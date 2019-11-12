@@ -36,6 +36,7 @@ int main(){
 	unsigned short temp;
 	unsigned short RAM[ramsize];
 	struct instr *tempRAM[ramsize];
+	unsigned short **instructions;
 	int i = 0;
 	for(i = 0; i < ramsize; i++){
 		tempRAM[i] = (struct instr*)malloc(sizeof(struct instr));
@@ -146,7 +147,8 @@ int main(){
 	//////////////////////////////////////////////
 	
 	START:
-		unsigned short **instructions;
+	
+		
 		instructions = malloc(sizeof(short)*15);
 		instructions[0] = &&LOD,instructions[1] = &&ADD,instructions[2] = &&SUB,instructions[3] = &&ORA,
 		instructions[4] = &&XOR,instructions[5] = &&SHR,instructions[6] = &&MUL,instructions[7] = &&STO,
