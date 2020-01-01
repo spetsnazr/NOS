@@ -29,7 +29,7 @@ gdi32.dll fajl prebaci iz system32 u aktuelni folder*/
 
 /* Instructions are coded like so: OOOO DDDD AAAA BBBB
    O - Opcode | D - Destination register | A and B - Source registers */
-struct instr { unsigned short opcode, dest, src1, src2; };
+struct instr { unsigned short *opcode, dest, src1, src2; };
 
 void WriteToRAM(unsigned short data, unsigned short address, unsigned short *RAM, struct instr *code){
     if(address < ROM){
@@ -116,6 +116,7 @@ LOD:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 ADD:
@@ -148,6 +149,7 @@ ADD:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 SUB:
@@ -180,6 +182,7 @@ SUB:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 AND:
@@ -212,6 +215,7 @@ AND:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 OR:
@@ -244,6 +248,7 @@ OR:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 XOR:
@@ -276,6 +281,7 @@ XOR:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 SHR:
@@ -319,6 +325,7 @@ SHR:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 MUL:
@@ -351,6 +358,7 @@ MUL:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 STO: //Ja ću ovu
@@ -439,6 +447,7 @@ STO: //Ja ću ovu
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 LDC:
@@ -472,6 +481,7 @@ LDC:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 GTU:
@@ -504,6 +514,7 @@ GTU:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
 	regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 GTS:
@@ -536,6 +547,7 @@ GTS:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
 	regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 LTU:
@@ -568,6 +580,7 @@ LTU:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
 	regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 LTS:
@@ -600,6 +613,7 @@ LTS:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 EQU:
@@ -632,6 +646,7 @@ EQU:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
 	regs[15]+=1; goto *code[TPC++].opcode;
     /* ------------------------------------------------------- */
 MAJ:
@@ -666,6 +681,7 @@ MAJ:
 			if(rowPixel == 32) rowPixel = 0;
 		}
 	}
+	if(TPC > PROGRAM_SIZE) goto END;
     goto *code[TPC].opcode;
     /* ------------------------------------------------------- */
 
