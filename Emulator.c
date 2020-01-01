@@ -9,6 +9,7 @@
 #define HDD 0xFFFC
 #define ROM 2048
 #define PROGRAM_SIZE 0
+#define DISK_NUM_SECTORS 100
 #define FREQUENCY 2000000
 
 
@@ -369,6 +370,10 @@ STO: //Ja ću ovu
 		goto END;
 	} else if(tempsrc2 == 0xFFFF){
 		printf("Error: Reserved address for keyboard input");
+		goto END;
+	}
+	if(RAM[0xFFFD] >  DISK_NUM_SECTORS){ 
+		printf("Not enough disk space");
 		goto END;
 	}
 	regs[tempsrc2] = RAM[tempsrc2] = code[TPC].src1;
