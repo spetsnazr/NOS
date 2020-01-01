@@ -11,6 +11,9 @@
 #define PROGRAM_SIZE 0
 #define FREQUENCY 2000000
 
+
+/*kompajlirati sa gcc Emulator.c -o ER -lgdi32, nakon što se 
+gdi32.dll fajl prebaci iz system32 u aktuelni folder*/
 /* TO DO LIST:
  * Popraviti greške pri kompajliranju
  * Implementirati traženu frekvenciju od 2 MHz upotrebom wait()
@@ -55,13 +58,620 @@ void main(){
     struct instr code[ROM];
     unsigned short *instructions[15];
     short regs[16];
-
+    regs[15] = 0;
     /* Frequency-related variables */
     struct timespec t1, t2;
-    int dt;
-    clock_t ct1, ct2;
+    int dt,j,rowPixel;
+    clock_t ct1, ct2,inter,nextinter;
+	unsigned char diskInstr = 0;
+	int br;
+	unsigned short dskRead = 0;
+    unsigned int RAMWriteTemp = 0;
+	unsigned short tempsrc2;
+	FILE *fp;
+	HWND consoleWindow = GetConsoleWindow();
+	HDC consoleDC = GetDC(consoleWindow);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    ct1 = clock();
+	inter = clock();
+	MSG msg;
+    goto START;
 
-    /* To prevent crashes in case a mistake is made regarding the program size */
+    /* Start recording the used time and clock cycles to adjust the frequency later on */
+    
+    
+
+    /* Access registers like so: regs[code[TPC].dest/src1/src2]; */
+LOD:
+    regs[code[TPC].dest] = regs[code[TPC].src2];
+
+    /* Wait to slow the program down to 2 MHz frequency, used in every instruction label */
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	nextinter = clock();
+	
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+ADD:
+    regs[code[TPC].dest] = regs[code[TPC].src1] + regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+SUB:
+    regs[code[TPC].dest] = regs[code[TPC].src1] - regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+AND:
+    regs[code[TPC].dest] = regs[code[TPC].src1] & regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+OR:
+    regs[code[TPC].dest] = regs[code[TPC].src1] | regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+XOR:
+    regs[code[TPC].dest] = regs[code[TPC].src1] ^ regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+SHR:
+    rotNum = regs[code[TPC].src2] & 0x07;
+    rot = (regs[code[TPC].src2] >> 3) & 0x03;
+    if(rot == 0){ /* Shift right, add sign to left side */
+        regs[code[TPC].dest] = __rorw(regs[code[TPC].src1], rotNum);
+    } else if(rot == 1){ /* Shift right, add 0 to left side */
+        regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) >> rotNum);
+    } else if(rot == 2){ /* Shift left, rotate to right side */
+        /* GCC-SPECIFIC COMMAND */
+        regs[code[TPC].dest] = __rolw(regs[code[TPC].src1], rotNum);
+    } else { /* Shift left, add 0 to right side */
+        regs[code[TPC].dest] = (regs[code[TPC].src1] << rotNum);
+    }
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+MUL:
+    regs[code[TPC].dest] = regs[code[TPC].src1] * regs[code[TPC].src2];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+STO: //Ja ću ovu
+    // Paziti na ROM upis
+	tempsrc2 = code[TPC].src2;
+	if(tempsrc2 < ROM){
+		printf("Error: Can't write into ROM");
+		goto END;
+	} else if(tempsrc2 == 0xFFFF){
+		printf("Error: Reserved address for keyboard input");
+		goto END;
+	}
+	regs[tempsrc2] = RAM[tempsrc2] = code[TPC].src1;
+	if(tempsrc2 >= 0xFFFC) diskInstr++;
+	if(diskInstr == 2){ 
+		diskInstr = 0;
+		switch(RAM[0xFFFE]){
+			case 0:
+			fp = fopen("HDD.dsk","w+");
+			fseek(fp,RAM[0xFFFD]*512,SEEK_SET);
+			for(br = 0; br < 512; br++){
+				fseek(fp,br,SEEK_CUR);
+				fwrite(0,1,1,fp);	
+			}
+			fclose(fp);
+			break;
+			case 1:
+			fp = fopen("HDD.dsk","r+");
+			fseek(fp,RAM[0xFFFD]*512,SEEK_SET);
+			RAMWriteTemp = RAM[0xFFFC];
+			if(RAMWriteTemp < 2048){
+				printf("Error: Can't write to ROM");
+				goto END;
+			} else if(tempsrc2 == 0xFFFF){
+				printf("Error: Reserved address for keyboard input");
+				goto END;
+			}
+			for(br = 0; br < 512; br+=2){
+				fseek(fp,br,SEEK_CUR);
+				fread(&dskRead,2,1,fp);
+				if(RAMWriteTemp > RAM_SIZE) break;
+				RAM[RAMWriteTemp++] = dskRead;
+			}
+			fclose(fp);
+			break;
+			case 2:
+			fp = fopen("HDD.dsk","w+");
+			fseek(fp,RAM[0xFFFD]*512,SEEK_SET);
+			RAMWriteTemp = RAM[0xFFFC];
+			for(br = 0; br < 512; br+=2){
+				fseek(fp,br,SEEK_CUR);
+				//može se u jednoj liniji ali ovako se obezbjeđuje da se ne izađe van
+				//opsega RAM-a
+				fwrite(&RAM[RAMWriteTemp++],2,1,fp);
+				if(RAMWriteTemp > RAM_SIZE) break;
+			}
+			fclose(fp);
+		}
+	}
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+LDC:
+    // Predznačno proširena od dva četverobitna broja???
+    regs[code[TPC].dest] = (code[TPC].src1 << 4) + code[TPC].src2;
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+GTU:
+    regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) > ((unsigned short)regs[code[TPC].src2]));
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+	regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+GTS:
+    regs[code[TPC].dest] = (regs[code[TPC].src1] > regs[code[TPC].src2]);
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+	regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+LTU:
+    regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) < ((unsigned short)regs[code[TPC].src2]));
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+	regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+LTS:
+    regs[code[TPC].dest] = (regs[code[TPC].src1] < regs[code[TPC].src2]);
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+EQU:
+    regs[code[TPC].dest] = (regs[code[TPC].src1] == regs[code[TPC].src2]);
+    ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+	regs[15]+=1; goto *code[TPC++].opcode;
+    /* ------------------------------------------------------- */
+MAJ:
+    regs[code[TPC].dest] = regs[code[TPC].src1];
+    regs[15] = regs[code[TPC].src2];
+	TPC = regs[15];
+	ct2 = clock();
+    if(ct2 - ct1 >= FREQUENCY){
+        ct1 = ct2;
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
+        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
+        if(dt < 1000) Sleep(1000 - dt);
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
+    }
+	/*Dobivamo WM_KEYDOWN ili WM_KEYUP message*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Prevoditmo taj message*/
+	TranslateMessage(&msg);
+	/*Nakon prevođenja dobivamo WM_CHAR*/
+	GetMessage(&msg, NULL, 0, 0);
+	/*Koristmo sam bite 16-23 od WM_CHAR jer je to karakter koji nam treba*/
+	RAM[0xFFFF] = (msg.lParam >> 15) & 0x0000FFFF;
+	if(!((nextinter-inter)/(CLOCKS_PER_SEC*100)%20)){
+		j = 0;
+		rowPixel = 0;
+		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
+			for(i = 0; i < 8; i++){
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
+			}
+			j++;
+			rowPixel++;
+			if(rowPixel == 32) rowPixel = 0;
+		}
+	}
+    goto *code[TPC].opcode;
+    /* ------------------------------------------------------- */
+
+START:
+
+/* To prevent crashes in case a mistake is made regarding the program size */
     if(PROGRAM_SIZE > ROM) {
         printf("Program size exceeds ROM capacity.");
         return;
@@ -80,101 +690,10 @@ void main(){
         code[i].src1 = (RAM[i] >> 4) & 0x000F;
         code[i].src2 = RAM[i] & 0x000F;
     }
-
-    /* Start recording the used time and clock cycles to adjust the frequency later on */
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
-    ct1 = clock();
-    PC+=4; goto *code[TPC++].opcode;
-
-    /* Access registers like so: regs[code[TPC].dest/src1/src2]; */
-LOD:
-    regs[code[TPC].dest] = regs[code[TPC].src2];
-
-    /* Wait to slow the program down to 2 MHz frequency, used in every instruction label */
-    ct2 = clock();
-    if(ct2 - ct1 >= FREQUENCY){
-        ct1 = ct2;
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t2);
-        dt = 1000.0*t2.tv_sec + 1e-6*t2.tv_nsec - (1000.0*t1.tv_sec + 1e-6*t1.tv_nsec);
-        if(dt < 1000) Sleep(1000 - dt);
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &t1);
-    }
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-ADD:
-    regs[code[TPC].dest] = regs[code[TPC].src1] + regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-SUB:
-    regs[code[TPC].dest] = regs[code[TPC].src1] - regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-AND:
-    regs[code[TPC].dest] = regs[code[TPC].src1] & regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-OR:
-    regs[code[TPC].dest] = regs[code[TPC].src1] | regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-XOR:
-    regs[code[TPC].dest] = regs[code[TPC].src1] ^ regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-SHR:
-    rotNum = regs[code[TPC].src2] & 0x07;
-    rot = (regs[code[TPC].src2] >> 3) & 0x03;
-    if(rot == 0){ /* Shift right, add sign to left side */
-        regs[code[TPC].dest] = __rorw(regs[code[TPC].src1], rotNum);
-    } else if(rot == 1){ /* Shift right, add 0 to left side */
-        regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) >> rotNum);
-    } else if(rot == 2){ /* Shift left, rotate to right side */
-        /* GCC-SPECIFIC COMMAND */
-        regs[code[TPC].dest] = __rolw(regs[code[TPC].src1], rotNum);
-    } else { /* Shift left, add 0 to right side */
-        regs[code[TPC].dest] = (regs[code[TPC].src1] << rotNum);
-    }
-
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-MUL:
-    regs[code[TPC].dest] = regs[code[TPC].src1] * regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-STO: //Ja ću ovu
-    // Paziti na ROM upis
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-LDC:
-    // Predznačno proširena od dva četverobitna broja???
-    regs[code[TPC].dest] = (code[TPC].src1 << 4) + code[TPC].src2;
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-GTU:
-    regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) > ((unsigned short)regs[code[TPC].src2]));
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-GTS:
-    regs[code[TPC].dest] = (regs[code[TPC].src1] > regs[code[TPC].src2]);
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-LTU:
-    regs[code[TPC].dest] = (((unsigned short)regs[code[TPC].src1]) < ((unsigned short)regs[code[TPC].src2]));
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-LTS:
-    regs[code[TPC].dest] = (regs[code[TPC].src1] < regs[code[TPC].src2]);
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-EQU:
-    regs[code[TPC].dest] = (regs[code[TPC].src1] == regs[code[TPC].src2]);
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-MAJ:
-    regs[code[TPC].dest] = regs[code[TPC].src1];
-    regs[15] = regs[code[TPC].src2];
-    PC+=4; goto *code[TPC++].opcode;
-    /* ------------------------------------------------------- */
-
+	
+	
+	regs[15]+=1; goto *code[TPC++].opcode;
 END:
+	return;
+	
 }
