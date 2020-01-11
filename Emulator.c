@@ -45,6 +45,7 @@ void main(){
     unsigned short *instructions[15];
     short regs[16];
     regs[15] = 0;
+	int an = 0;
 	
     /* Frequency-related variables */
     struct timespec t1, t2;
@@ -74,7 +75,7 @@ void main(){
 	RAM[0xEFF7] = 0xFFFF;
 	RAM[0xEFF8] = 0xFFFF;
 	RECT rekt;
-	for(br=0; br < 8; br++) printf("\n\n");
+	for(br=0; br < 8; br++) printf("\n\n\n\n\n\n\n");
 	GetWindowRect(consoleWindow ,&rekt);
 	//DWORD dw = GetLastError(); 
 	//printf("NIGGERS%s",dw);
@@ -124,7 +125,7 @@ LOD:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i + rekt.right/2, j/32 + rekt.bottom , RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -158,7 +159,7 @@ ADD:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -192,7 +193,7 @@ SUB:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -226,7 +227,7 @@ AND:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -260,7 +261,7 @@ OR:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -294,7 +295,7 @@ XOR:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -339,7 +340,7 @@ SHR:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -373,7 +374,7 @@ MUL:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -467,7 +468,7 @@ STO: //Ja ću ovu
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -507,7 +508,7 @@ LDC:
 		
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -543,7 +544,7 @@ GTU:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -577,7 +578,7 @@ GTS:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -611,7 +612,7 @@ LTU:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -679,7 +680,7 @@ EQU:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
@@ -715,7 +716,7 @@ MAJ:
 		rowPixel = 0;
 		for(br = VIDEO_MEMORY; br < 0xFFFC; br++){
 			for(i = 0; i < 8; i++){
-				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i+ rekt.right/4, j/32+rekt.bottom/2, RGB(255, 255, 255));
+				if(RAM[br] >> i & 0x0001) SetPixel(consoleDC, rowPixel*8 + i, j/32, RGB(255, 255, 255));
 			}
 			j++;
 			rowPixel++;
